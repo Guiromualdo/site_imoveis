@@ -55,10 +55,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'imoveis_site.urls'
 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Adicione esta linha se não tiver
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Esta linha é crucial!
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -131,7 +132,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
-
+LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 

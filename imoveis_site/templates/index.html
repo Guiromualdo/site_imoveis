@@ -1,34 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Imóveis - Anúncios</title>
-    <!-- Inclua Bootstrap se configurado -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container mt-4">
-        <h1>Anúncios Disponíveis</h1>
-        {% if ads %}
-            <div class="row">
-                {% for ad in ads %}
-                    <div class="col-md-4 mb-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ ad.title }}</h5>
-                                <p class="card-text">{{ ad.description }}</p>
-                                <p class="card-text">Preço: R$ {{ ad.price }}</p>
-                                <p class="card-text">Local: {{ ad.location }}</p>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p>Nenhum anúncio disponível.</p>
-        {% endif %}
-        <a href="{% url 'create_ad' %}" class="btn btn-primary mt-3">Criar Anúncio</a>
-    </div>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Anúncios Disponíveis</h1>
+  {% if ads %}
+    {% for ad in ads %}
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">{{ ad.title }}</h5>
+          <p class="card-text">Categoria: {{ ad.category }}</p>
+          <p class="card-text">Preço: R$ {{ ad.price }}</p>
+          <p class="card-text">Local: {{ ad.location }}</p>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>Nenhum anúncio disponível.</p>
+  {% endif %}
+  <a href="{% url 'create_ad' %}" class="btn btn-primary">Criar Anúncio</a>
+{% endblock %}

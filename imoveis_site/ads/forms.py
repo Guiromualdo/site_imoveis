@@ -17,3 +17,4 @@ class OfferForm(forms.ModelForm):
             'message': forms.Textarea(attrs={'rows': 3}),
         }
 
+
