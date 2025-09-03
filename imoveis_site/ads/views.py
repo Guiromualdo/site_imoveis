@@ -18,7 +18,7 @@ def create_ad(request):
     return render(request, 'create_ad.html', {'form': form})
 
 def index(request):
-    anuncios = Anuncio.objects.all()  # Pega todos os anúncios
+    anuncios = WantedAd.objects.all()
     return render(request, 'index.html', {'ads': anuncios})
 
 @login_required

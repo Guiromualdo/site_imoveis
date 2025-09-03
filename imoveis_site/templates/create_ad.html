@@ -1,31 +1,10 @@
 {% extends 'base.html' %}
+
 {% block content %}
-  <h2>Criar Anúncio</h2>
-  <form method="post">
+<h2>Criar Anúncio</h2>
+<form method="post">
     {% csrf_token %}
-    <div class="mb-3">
-      <label for="title" class="form-label">Título</label>
-      <input type="text" class="form-control" id="title" name="title" required>
-    </div>
-    <div class="mb-3">
-      <label for="category" class="form-label">Categoria</label>
-      <select class="form-select" id="category" name="category" required>
-        <option value="">Selecione uma categoria</option>
-        <option value="eletronicos">Eletrônicos</option>
-        <option value="roupas">Roupas</option>
-        <option value="moveis">Móveis</option>
-        <option value="esportes">Esportes</option>
-        <option value="livros">Livros</option>
-      </select>
-    </div>
-    <div class="mb-3">
-      <label for="price" class="form-label">Preço</label>
-      <input type="number" class="form-control" id="price" name="price" step="0.01" required>
-    </div>
-    <div class="mb-3">
-      <label for="location" class="form-label">Local</label>
-      <input type="text" class="form-control" id="location" name="location" required>
-    </div>
+    {{ form.as_p }}
     <button type="submit" class="btn btn-primary">Salvar</button>
-  </form>
+</form>
 {% endblock %}
