@@ -1,10 +1,153 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+
+{% block title %}Login - Site de Imóveis{% endblock %}
 
 {% block content %}
-<h2>Login</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Entrar</button>
-</form>
+<div class="form-container" style="max-width: 450px;">
+    <!-- Cabeçalho -->
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🔐</div>
+        <h2 style="color: var(--cor-destaque); font-size: 2rem; margin-bottom: 0.5rem;">
+            Fazer Login
+        </h2>
+        <p style="color: var(--cor-texto);">
+            Acesse sua conta para gerenciar anúncios
+        </p>
+    </div>
+
+    <!-- Mensagens de Erro -->
+    {% if form.non_field_errors %}
+        <div class="alert alert-error" style="margin-bottom: 1.5rem;">
+            <strong>❌ Erro no login:</strong><br>
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Formulário de Login -->
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Campo Username -->
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">
+                👤 Nome de Usuário
+            </label>
+            {{ form.username }}
+            {% if form.username.errors %}
+                {% for error in form.username.errors %}
+                    <div style="color: #dc3545; font-size: 0.9rem; margin-top: 0.25rem;">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- Campo Password -->
+        <div class="form-group">
+            <label for="{{ form.password.id_for_label }}">
+                🔑 Senha
+            </label>
+            {{ form.password }}
+            {% if form.password.errors %}
+                {% for error in form.password.errors %}
+                    <div style="color: #dc3545; font-size: 0.9rem; margin-top: 0.25rem;">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- Opções adicionais -->
+        <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" name="remember_me" style="transform: scale(1.1);">
+                <span style="color: var(--cor-texto); font-size: 0.9rem;">Lembrar-me</span>
+            </label>
+            <a href="#" style="color: var(--cor-link); font-size: 0.9rem; text-decoration: none;">
+                Esqueci minha senha
+            </a>
+        </div>
+
+        <!-- Botão de Login -->
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+            🚪 Entrar na Conta
+        </button>
+    </form>
+
+    <!-- Separador -->
+    <div style="text-align: center; margin: 2rem 0;">
+        <hr style="border: none; border-top: 1px solid var(--cor-secundaria); margin: 1rem 0;">
+        <span style="background: var(--branco); padding: 0 1rem; color: var(--cor-destaque); font-size: 0.9rem;">
+            ou
+        </span>
+    </div>
+
+    <!-- Link para Registro -->
+    <div style="text-align: center;">
+        <p style="color: var(--cor-texto); margin-bottom: 1rem;">
+            Ainda não tem uma conta?
+        </p>
+        <a href="#" class="btn btn-secondary" style="width: 100%; padding: 1rem;">
+            📝 Criar Nova Conta
+        </a>
+    </div>
+
+    <!-- Informações sobre benefícios -->
+    <div style="background: var(--cor-info); padding: 1rem; border-radius: 6px; margin-top: 2rem;">
+        <h4 style="color: #0c5460; margin-bottom: 0.5rem; font-size: 1rem;">
+            ✨ Com sua conta você pode:
+        </h4>
+        <ul style="margin: 0; padding-left: 1.5rem; color: #0c5460; font-size: 0.9rem;">
+            <li>Anunciar seus imóveis gratuitamente</li>
+            <li>Gerenciar todos os seus anúncios</li>
+            <li>Receber contatos de interessados</li>
+            <li>Editar informações a qualquer momento</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Script para melhorar UX -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Adiciona classes aos campos do Django
+    const inputs = document.querySelectorAll('input[type="text"], input[type="password"]');
+    inputs.forEach(function(input) {
+        if (!input.classList.contains('form-control')) {
+            input.classList.add('form-control');
+        }
+        
+        // Placeholder personalizado
+        if (input.name === 'username') {
+            input.placeholder = 'Digite seu nome de usuário';
+        } else if (input.name === 'password') {
+            input.placeholder = 'Digite sua senha';
+        }
+    });
+    
+    // Foco no primeiro campo
+    const firstInput = document.querySelector('input[type="text"]');
+    if (firstInput) {
+        firstInput.focus();
+    }
+    
+    // Efeito de loading no botão
+    const form = document.querySelector('form');
+    const submitBtn = document.querySelector('button[type="submit"]');
+    
+    form.addEventListener('submit', function() {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '⏳ Entrando...';
+        submitBtn.style.opacity = '0.7';
+        
+        // Reabilita o botão após 5 segundos (caso de erro)
+        setTimeout(function() {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '🚪 Entrar na Conta';
+            submitBtn.style.opacity = '1';
+        }, 5000);
+    });
+});
+</script>
 {% endblock %}

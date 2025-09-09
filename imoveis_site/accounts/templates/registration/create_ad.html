@@ -1,31 +1,167 @@
 {% extends 'base.html' %}
+
+{% block title %}Criar Anúncio - Site de Imóveis{% endblock %}
+
 {% block content %}
-  <h2>Criar Anúncio</h2>
-  <form method="post">
-    {% csrf_token %}
-    <div class="mb-3">
-      <label for="title" class="form-label">Título</label>
-      <input type="text" class="form-control" id="title" name="title" required>
+<div class="form-container">
+    <!-- Cabeçalho -->
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="color: var(--cor-destaque); font-size: 2rem; margin-bottom: 0.5rem;">
+            📝 Criar Novo Anúncio
+        </h2>
+        <p style="color: var(--cor-texto);">
+            Preencha as informações do seu imóvel
+        </p>
     </div>
-    <div class="mb-3">
-      <label for="category" class="form-label">Categoria</label>
-      <select class="form-select" id="category" name="category" required>
-        <option value="">Selecione uma categoria</option>
-        <option value="eletronicos">Eletrônicos</option>
-        <option value="roupas">Roupas</option>
-        <option value="moveis">Móveis</option>
-        <option value="esportes">Esportes</option>
-        <option value="livros">Livros</option>
-      </select>
-    </div>
-    <div class="mb-3">
-      <label for="price" class="form-label">Preço</label>
-      <input type="number" class="form-control" id="price" name="price" step="0.01" required>
-    </div>
-    <div class="mb-3">
-      <label for="location" class="form-label">Local</label>
-      <input type="text" class="form-control" id="location" name="location" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Salvar</button>
-  </form>
+
+    <!-- Formulário -->
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Título -->
+        <div class="form-group">
+            <label for="title">
+                🏠 Título do Anúncio <span style="color: #dc3545;">*</span>
+            </label>
+            <input type="text" 
+                   class="form-control" 
+                   id="title" 
+                   name="title" 
+                   placeholder="Ex: Apartamento 2 quartos no Centro"
+                   required>
+            <small style="color: var(--cor-destaque); font-size: 0.9rem;">
+                Seja claro e objetivo no título
+            </small>
+        </div>
+
+        <!-- Categoria -->
+        <div class="form-group">
+            <label for="category">
+                📂 Tipo de Imóvel <span style="color: #dc3545;">*</span>
+            </label>
+            <select class="form-control" id="category" name="category" required>
+                <option value="">Selecione o tipo</option>
+                <option value="apartamento">🏢 Apartamento</option>
+                <option value="casa">🏡 Casa</option>
+                <option value="studio">🏠 Studio/Kitnet</option>
+                <option value="comercial">🏪 Comercial</option>
+                <option value="terreno">🌾 Terreno</option>
+                <option value="chacara">🏞️ Chácara/Sítio</option>
+            </select>
+        </div>
+
+        <!-- Preço e Local na mesma linha -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="price">
+                        💰 Preço Mensal (R$) <span style="color: #dc3545;">*</span>
+                    </label>
+                    <input type="number" 
+                           class="form-control" 
+                           id="price" 
+                           name="price" 
+                           step="0.01" 
+                           min="0"
+                           placeholder="1500.00"
+                           required>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="location">
+                        📍 Localização <span style="color: #dc3545;">*</span>
+                    </label>
+                    <input type="text" 
+                           class="form-control" 
+                           id="location" 
+                           name="location" 
+                           placeholder="Ex: Belo Horizonte - MG"
+                           required>
+                </div>
+            </div>
+        </div>
+
+        <!-- Descrição -->
+        <div class="form-group">
+            <label for="description">
+                📄 Descrição Detalhada
+            </label>
+            <textarea class="form-control" 
+                      id="description" 
+                      name="description" 
+                      rows="5" 
+                      placeholder="Descreva as características do imóvel, comodidades, localização, etc."></textarea>
+            <small style="color: var(--cor-destaque); font-size: 0.9rem;">
+                Quanto mais detalhes, melhor para atrair interessados
+            </small>
+        </div>
+
+        <!-- Upload de Imagem (se existir no model) -->
+        <div class="form-group">
+            <label for="image">
+                📸 Foto do Imóvel
+            </label>
+            <input type="file" 
+                   class="form-control" 
+                   id="image" 
+                   name="image" 
+                   accept="image/*">
+            <small style="color: var(--cor-destaque); font-size: 0.9rem;">
+                Uma boa foto aumenta suas chances de locação
+            </small>
+        </div>
+
+        <!-- Informações Adicionais -->
+        <div style="background: var(--cor-primaria); padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem;">
+            <h4 style="color: var(--cor-destaque); margin-bottom: 0.5rem; font-size: 1.1rem;">
+                💡 Dicas para um bom anúncio:
+            </h4>
+            <ul style="margin: 0; padding-left: 1.5rem; color: var(--cor-texto);">
+                <li>Use um título claro e atrativo</li>
+                <li>Inclua todas as características importantes</li>
+                <li>Seja honesto sobre o estado do imóvel</li>
+                <li>Adicione uma foto de qualidade</li>
+            </ul>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <button type="submit" class="btn btn-primary" style="min-width: 150px;">
+                ✅ Publicar Anúncio
+            </button>
+            <a href="{% url 'index' %}" class="btn btn-secondary" style="min-width: 150px;">
+                ❌ Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Script para melhorar UX -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Adiciona contador de caracteres para descrição
+    const descricao = document.getElementById('description');
+    if (descricao) {
+        const contador = document.createElement('small');
+        contador.style.color = 'var(--cor-destaque)';
+        contador.style.float = 'right';
+        descricao.parentNode.appendChild(contador);
+        
+        descricao.addEventListener('input', function() {
+            contador.textContent = `${this.value.length} caracteres`;
+        });
+    }
+    
+    // Formatação automática do preço
+    const preco = document.getElementById('price');
+    if (preco) {
+        preco.addEventListener('blur', function() {
+            if (this.value) {
+                this.value = parseFloat(this.value).toFixed(2);
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

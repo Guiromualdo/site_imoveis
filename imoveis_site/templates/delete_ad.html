@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Excluir Anúncio - Site de Imóveis{% endblock %}
+
+{% block content %}
+<div class="form-container" style="max-width: 500px;">
+    <!-- Ícone de Aviso -->
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <div style="font-size: 4rem; color: #dc3545; margin-bottom: 1rem;">
+            ⚠️
+        </div>
+        <h2 style="color: #dc3545; font-size: 1.8rem; margin-bottom: 0.5rem;">
+            Excluir Anúncio
+        </h2>
+        <p style="color: var(--cor-texto);">
+            Esta ação não pode ser desfeita
+        </p>
+    </div>
+
+    <!-- Informações do Anúncio -->
+    <div style="background: var(--cor-erro); border: 1px solid #f5c6cb; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <h3 style="color: #721c24; margin-bottom: 1rem; font-size: 1.2rem;">
+            📋 Anúncio que será excluído:
+        </h3>
+        
+        <div style="background: var(--branco); padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+            <h4 style="color: var(--cor-destaque); margin-bottom: 0.5rem;">
+                🏠 {{ ad.title }}
+            </h4>
+            <p style="margin: 0.25rem 0; color: var(--cor-texto); font-size: 0.9rem;">
+                <strong>📍 Local:</strong> {{ ad.location }}
+            </p>
+            <p style="margin: 0.25rem 0; color: var(--cor-texto); font-size: 0.9rem;">
+                <strong>📂 Tipo:</strong> {{ ad.category }}
+            </p>
+            <p style="margin: 0.25rem 0; color: var(--cor-link); font-size: 1rem;">
+                <strong>💰 Preço:</strong> R$ {{ ad.price }}/mês
+            </p>
+            {% if ad.description %}
+                <p style="margin: 0.5rem 0 0 0; color: var(--cor-texto); font-size: 0.9rem;">
+                    <strong>📄 Descrição:</strong> {{ ad.description|truncatewords:20 }}
+                </p>
+            {% endif %}
+        </div>
+        
+        <div style="color: #721c24; font-size: 0.9rem;">
+            <strong>⏰ Criado em:</strong> {{ ad.created_at|date:"d/m/Y às H:i" }}<br>
+            {% if ad.updated_at != ad.created_at %}
+                <strong>✏️ Última edição:</strong> {{ ad.updated_at|date:"d/m/Y às H:i" }}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Pergunta de Confirmação -->
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h3 style="color: var(--cor-destaque); font-size: 1.3rem; margin-bottom: 1rem;">
+            Tem certeza que deseja excluir este anúncio?
+        </h3>
+        <p style="color: var(--cor-texto); font-size: 1rem;">
+            Uma vez excluído, você perderá:
+        </p>
+        <ul style="text-align: left; color: var(--cor-texto); margin: 1rem 0; padding-left: 2rem;">
+            <li>Todas as informações do anúncio</li>
+            <li>Possíveis contatos de interessados</li>
+            <li>O histórico de visualizações</li>
+            <li>As fotos enviadas</li>
+        </ul>
+    </div>
+
+    <!-- Formulário de Confirmação -->
+    <form method="post" style="text-align: center;">
+        {% csrf_token %}
+        
+        <!-- Checkbox de Confirmação -->
+        <div style="margin-bottom: 2rem;">
+            <label style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="confirm-delete" required style="transform: scale(1.2);">
+                <span style="color: var(--cor-texto);">
+                    Entendo que esta ação é irreversível
+                </span>
+            </label>
+        </div>
+        
+        <!-- Botões de Ação -->
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <button type="submit" 
+                    class="btn btn-danger" 
+                    style="min-width: 150px;"
+                    id="delete-btn"
+                    disabled>
+                🗑️ Sim, Excluir Definitivamente
+            </button>
+            <a href="{% url 'index' %}" 
+               class="btn btn-secondary" 
+               style="min-width: 150px;">
+                ↩️ Cancelar e Voltar
+            </a>
+        </div>
+    </form>
+
+    <!-- Alternativas -->
+    <div style="background: var(--cor-info); padding: 1rem; border-radius: 6px; margin-top: 2rem; text-align: center;">
+        <h4 style="color: #0c5460; margin-bottom: 0.5rem; font-size: 1rem;">
+            💡 Alternativas à exclusão:
+        </h4>
+        <p style="margin: 0; color: #0c5460; font-size: 0.9rem;">
+            Em vez de excluir, você pode 
+            <a href="{% url 'edit_ad' ad.id %}" style="color: #007bff; text-decoration: underline;">
+                editar o anúncio
+            </a> para atualizá-lo
+        </p>
+    </div>
+</div>
+
+<!-- Script para controlar o botão -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkbox = document.getElementById('confirm-delete');
+    const deleteBtn = document.getElementById('delete-btn');
+    
+    checkbox.addEventListener('change', function() {
+        deleteBtn.disabled = !this.checked;
+        
+        if (this.checked) {
+            deleteBtn.style.opacity = '1';
+            deleteBtn.style.cursor = 'pointer';
+        }

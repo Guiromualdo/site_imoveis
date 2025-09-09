@@ -1,19 +1,136 @@
 {% extends 'base.html' %}
+
+{% block title %}Home - Site de Imóveis{% endblock %}
+
 {% block content %}
-  <h1>Anúncios Disponíveis</h1>
-  {% if ads %}
-    {% for ad in ads %}
-      <div class="card mb-3">
-        <div class="card-body">
-          <h5 class="card-title">{{ ad.title }}</h5>
-          <p class="card-text">Categoria: {{ ad.category }}</p>
-          <p class="card-text">Preço: R$ {{ ad.price }}</p>
-          <p class="card-text">Local: {{ ad.location }}</p>
+<!-- Hero Section -->
+<div class="card" style="text-align: center; margin-bottom: 3rem;">
+    <div class="card-body" style="padding: 3rem;">
+        <h1 style="color: var(--cor-destaque); font-size: 2.5rem; margin-bottom: 1rem;">
+            🏠 Encontre o Imóvel Perfeito
+        </h1>
+        <p style="font-size: 1.2rem; color: var(--cor-texto); margin-bottom: 2rem;">
+            Conectamos proprietários e inquilinos de forma simples e segura
+        </p>
+        {% if user.is_authenticated %}
+            <a href="{% url 'create_ad' %}" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                📝 Anunciar Meu Imóvel
+            </a>
+        {% else %}
+            <a href="{% url 'login' %}" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                🔐 Fazer Login para Anunciar
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Título dos Anúncios -->
+<div style="text-align: center; margin-bottom: 2rem;">
+    <h2 style="color: var(--cor-destaque); font-size: 2rem;">
+        Imóveis Disponíveis
+    </h2>
+    <p style="color: var(--cor-texto);">Encontre o imóvel ideal para você</p>
+</div>
+
+<!-- Grid de Anúncios -->
+{% if ads %}
+    <div class="row">
+        {% for ad in ads %}
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Título do Anúncio -->
+                    <h3 class="card-title" style="color: var(--cor-destaque); font-size: 1.4rem;">
+                        🏠 {{ ad.title }}
+                    </h3>
+                    
+                    <!-- Informações Principais -->
+                    <div style="margin-bottom: 1rem;">
+                        <p style="margin: 0.5rem 0; color: var(--cor-texto);">
+                            <strong>📍 Local:</strong> {{ ad.location }}
+                        </p>
+                        <p style="margin: 0.5rem 0; color: var(--cor-texto);">
+                            <strong>📂 Categoria:</strong> {{ ad.category }}
+                        </p>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--cor-link); margin: 1rem 0;">
+                            💰 R$ {{ ad.price }}/mês
+                        </div>
+                    </div>
+                    
+                    <!-- Descrição -->
+                    <div style="background: var(--cor-primaria); padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+                        <p style="margin: 0; color: var(--cor-texto); line-height: 1.5;">
+                            {{ ad.description|truncatewords:25 }}
+                        </p>
+                    </div>
+                    
+                    <!-- Informação do Proprietário -->
+                    <p style="font-size: 0.9rem; color: var(--cor-destaque); margin-bottom: 1rem;">
+                        👤 Anunciado por: <strong>{{ ad.created_by.username }}</strong>
+                    </p>
+                    
+                    <!-- Botões de Ação -->
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        {% if ad.created_by == request.user %}
+                            <!-- Botões para o dono do anúncio -->
+                            <a href="{% url 'edit_ad' ad.id %}" class="btn btn-secondary">
+                                ✏️ Editar
+                            </a>
+                            <a href="{% url 'delete_ad' ad.id %}" class="btn btn-danger">
+                                🗑️ Excluir
+                            </a>
+                        {% else %}
+                            <!-- Botões para outros usuários -->
+                            {% if user.is_authenticated %}
+                                <button class="btn btn-primary" onclick="alert('Em breve: sistema de contato!')">
+                                    📞 Entrar em Contato
+                                </button>
+                                <button class="btn btn-secondary" onclick="alert('Em breve: favoritos!')">
+                                    ❤️ Favoritar
+                                </button>
+                            {% else %}
+                                <a href="{% url 'login' %}" class="btn btn-primary">
+                                    🔐 Login para Contatar
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    {% endfor %}
-  {% else %}
-    <p>Nenhum anúncio disponível.</p>
-  {% endif %}
-  <a href="{% url 'create_ad' %}" class="btn btn-primary">Criar Anúncio</a>
+        {% endfor %}
+    </div>
+{% else %}
+    <!-- Quando não há anúncios -->
+    <div class="card" style="text-align: center;">
+        <div class="card-body" style="padding: 3rem;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🏠</div>
+            <h3 style="color: var(--cor-destaque); margin-bottom: 1rem;">
+                Nenhum imóvel cadastrado ainda
+            </h3>
+            <p style="color: var(--cor-texto); margin-bottom: 2rem;">
+                Seja o primeiro a anunciar um imóvel em nossa plataforma!
+            </p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'create_ad' %}" class="btn btn-primary">
+                    📝 Criar Primeiro Anúncio
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary">
+                    🔐 Faça Login para Anunciar
+                </a>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+
+<!-- Botão Flutuante para Criar Anúncio -->
+{% if user.is_authenticated %}
+<div style="position: fixed; bottom: 2rem; right: 2rem; z-index: 100;">
+    <a href="{% url 'create_ad' %}" class="btn btn-primary" 
+       style="border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 12px var(--sombra);">
+        ➕
+    </a>
+</div>
+{% endif %}
 {% endblock %}

@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Anúncio - Site de Imóveis{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <!-- Cabeçalho -->
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="color: var(--cor-destaque); font-size: 2rem; margin-bottom: 0.5rem;">
+            ✏️ Editar Anúncio
+        </h2>
+        <p style="color: var(--cor-texto);">
+            Atualize as informações do seu imóvel
+        </p>
+        
+        <!-- Informações do anúncio atual -->
+        <div style="background: var(--cor-info); padding: 1rem; border-radius: 6px; margin-top: 1rem;">
+            <strong>Editando:</strong> {{ ad.title }}
+        </div>
+    </div>
+
+    <!-- Formulário -->
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Usar form.as_p estilizado ou campos individuais -->
+        {% if form.title %}
+            <!-- Título -->
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">
+                    🏠 Título do Anúncio <span style="color: #dc3545;">*</span>
+                </label>
+                {{ form.title }}
+                {% if form.title.help_text %}
+                    <small style="color: var(--cor-destaque); font-size: 0.9rem;">
+                        {{ form.title.help_text }}
+                    </small>
+                {% endif %}
+                {% if form.title.errors %}
+                    {% for error in form.title.errors %}
+                        <div style="color: #dc3545; font-size: 0.9rem; margin-top: 0.25rem;">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if form.category %}
+            <!-- Categoria -->
+            <div class="form-group">
+                <label for="{{ form.category.id_for_label }}">
+                    📂 Tipo de Imóvel <span style="color: #dc3545;">*</span>
+                </label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                    {% for error in form.category.errors %}
+                        <div style="color: #dc3545; font-size: 0.9rem; margin-top: 0.25rem;">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Preço e Local na mesma linha -->
+        <div class="row">
+            {% if form.price %}
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.price.id_for_label }}">
+                            💰 Preço Mensal (R$) <span style="color: #dc3545;">*</span>
+                        </label>
+                        {{ form.price }}
+                        {% if form.price.errors %}
+                            {% for error in form.price.errors %}
+                                <div style="color: #dc3545; font-size: 0.9rem; margin-top: 0.25rem;">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% if form.location %}
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.location.id_for_label }}">
+                            📍 Localização <span style="color: #dc3545;">*</span>
+                        </label>
+                        {{ form.location }}
+                        {% if form.location.errors %}
+                            {% for error in form.location.errors %}
+                                <div style="color: #dc3545; font-size: 0.9rem; margin-top: 0.25rem;">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if form.description %}
+            <!-- Descrição -->
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">
+                    📄 Descrição Detalhada
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    {% for error in form.description.errors %}
+                        <div style="color: #dc3545; font-size: 0.9rem; margin-top: 0.25rem;">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if form.image %}
+            <!-- Upload de Imagem -->
+            <div class="form-group">
+                <label for="{{ form.image.id_for_label }}">
+                    📸 Foto do Imóvel
+                </label>
+                {{ form.image }}
+                {% if ad.image %}
+                    <div style="margin-top: 0.5rem;">
+                        <small style="color: var(--cor-destaque);">
+                            Foto atual: {{ ad.image.name|truncatechars:30 }}
+                        </small>
+                    </div>
+                {% endif %}
+                <small style="color: var(--cor-destaque); font-size: 0.9rem; display: block; margin-top: 0.25rem;">
+                    Deixe em branco para manter a foto atual
+                </small>
+            </div>
+        {% endif %}
+
+        <!-- Se existirem campos não cobertos acima, mostrar todos -->
+        {% if not form.title and not form.category %}
+            <div style="background: var(--cor-primaria); padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+                {{ form.as_p }}
+            </div>
+        {% endif %}
+
+        <!-- Informações sobre última edição -->
+        <div style="background: var(--cor-warning); padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem;">
+            <h4 style="color: var(--cor-destaque); margin-bottom: 0.5rem; font-size: 1.1rem;">
+                ℹ️ Informações da Edição:
+            </h4>
+            <p style="margin: 0; color: var(--cor-texto); font-size: 0.9rem;">
+                • Anúncio criado em: {{ ad.created_at|date:"d/m/Y às H:i" }}<br>
+                • Última modificação: {{ ad.updated_at|date:"d/m/Y às H:i" }}<br>
+                • Suas alterações serão salvas imediatamente
+            </p>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <button type="submit" class="btn btn-success" style="min-width: 150px;">
+                ✅ Salvar Alterações
+            </button>
+            <a href="{% url 'index' %}" class="btn btn-secondary" style="min-width: 150px;">
+                👁️ Ver Anúncios
+            </a>
+            <a href="{% url 'delete_ad' ad.id %}" class="btn btn-danger" style="min-width: 150px;">
+                🗑️ Excluir Anúncio
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Script para melhorar UX -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Adiciona classe form-control aos campos gerados pelo Django
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(function(input) {
+        if (!input.classList.contains('form-control') && input.type !== 'submit') {
+            input.classList.add('form-control');
+        }
+    });
+    
+    // Confirmação antes de excluir
+    const deleteBtn = document.querySelector('a.btn-danger');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function(e) {
+            if (!confirm('Tem certeza que deseja excluir este anúncio? Esta ação não pode ser desfeita.')) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
