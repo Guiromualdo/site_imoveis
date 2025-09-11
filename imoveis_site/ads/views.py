@@ -1,13 +1,51 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, authenticate
 from django.contrib import messages
+from django.contrib.auth.models import User
 from .models import WantedAd, Offer, AdImage
+from .forms import CustomUserCreationForm, UserProfileForm
 
 # View para a página principal
 def index(request):
-    # Busca todos os anúncios ativos, ordenados pelos mais recentes
     ads = WantedAd.objects.filter(is_active=True).order_by('-created_at')
     return render(request, 'index.html', {'ads': ads})
+
+# View para registro de usuário
+def register(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Conta criada para {username}! Você já pode fazer login.')
+            return redirect('login')
+    else:
+        form = CustomUserCreationForm()
+    return render(request, 'registration/register.html', {'form': form})
+
+# View para perfil do usuário
+@login_required
+def profile(request):
+    user_ads = WantedAd.objects.filter(created_by=request.user).order_by('-created_at')
+    return render(request, 'registration/profile.html', {
+        'user_ads': user_ads,
+        'total_ads': user_ads.count(),
+        'active_ads': user_ads.filter(is_active=True).count()
+    })
+
+# View para editar perfil
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Perfil atualizado com sucesso!')
+            return redirect('profile')
+    else:
+        form = UserProfileForm(instance=request.user)
+    return render(request, 'registration/edit_profile.html', {'form': form})
 
 # View para criar anúncio
 @login_required
@@ -20,7 +58,6 @@ def create_ad(request):
         price = request.POST.get('price')
         reward = request.POST.get('reward')
         
-        # Criar o anúncio
         ad = WantedAd.objects.create(
             title=title,
             description=description,
@@ -88,9 +125,3 @@ def create_offer(request, ad_id):
         return redirect('index')
     
     return render(request, 'create_offer.html', {'ad': ad})
-
-# View para listar anúncios do usuário
-@login_required
-def listar_anuncios(request):
-    anuncios = WantedAd.objects.filter(created_by=request.user)
-    return render(request, 'anuncios/listar.html', {'anuncios': anuncios})

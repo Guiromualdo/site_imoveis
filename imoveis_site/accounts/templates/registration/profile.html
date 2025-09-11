@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Meu Perfil - Site de Imóveis{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin: 2rem auto;">
+    
+    <!-- Cabeçalho do Perfil -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <div class="card-body" style="text-align: center; padding: 2rem;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">👤</div>
+            <h1 style="color: var(--cor-destaque); margin-bottom: 0.5rem;">
+                {{ user.first_name }} {{ user.last_name }}
+            </h1>
+            <p style="color: var(--cor-texto); margin-bottom: 1rem;">
+                @{{ user.username }} • {{ user.email }}
+            </p>
+            <a href="{% url 'edit_profile' %}" class="btn btn-secondary">
+                ✏️ Editar Perfil
+            </a>
+        </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row" style="margin-bottom: 2rem;">
+        <div class="col-md-4">
+            <div class="card" style="text-align: center;">
+                <div class="card-body">
+                    <div style="font-size: 2rem; color: var(--cor-destaque);">{{ total_ads }}</div>
+                    <div>Total de Anúncios</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card" style="text-align: center;">
+                <div class="card-body">
+                    <div style="font-size: 2rem; color: var(--cor-link);">{{ active_ads }}</div>
+                    <div>Anúncios Ativos</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card" style="text-align: center;">
+                <div class="card-body">
+                    <div style="font-size: 2rem; color: var(--cor-destaque);">{{ user.date_joined|date:"M Y" }}</div>
+                    <div>Membro desde</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Meus Anúncios -->
+    <div class="card">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0;">🏠 Meus Anúncios</h3>
+            <a href="{% url 'create_ad' %}" class="btn btn-primary">
+                ➕ Novo Anúncio
+            </a>
+        </div>
+        <div class="card-body">
+            {% if user_ads %}
+                <div class="row">
+                    {% for ad in user_ads %}
+                    <div class="col-md-6" style="margin-bottom: 1rem;">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 style="color: var(--cor-destaque);">{{ ad.title }}</h5>
+                                <p style="margin: 0.5rem 0;">📍 {{ ad.location }}</p>
+                                <p style="margin: 0.5rem 0;">💰 R$ {{ ad.price }}</p>
+                                <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                                    <a href="{% url 'edit_ad' ad.id %}" class="btn btn-secondary btn-sm">
+                                        ✏️ Editar
+                                    </a>
+                                    <a href="{% url 'delete_ad' ad.id %}" class="btn btn-danger btn-sm">
+                                        🗑️ Excluir
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 2rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🏠</div>
+                    <h4>Nenhum anúncio ainda</h4>
+                    <p>Crie seu primeiro anúncio para começar!</p>
+                    <a href="{% url 'create_ad' %}" class="btn btn-primary">
+                        ➕ Criar Primeiro Anúncio
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

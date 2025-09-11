@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Site de Imóveis{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 400px; margin: 2rem auto;">
+    <div class="card">
+        <div class="card-header" style="text-align: center; background: var(--cor-destaque); color: white;">
+            <h2 style="margin: 0;">🔐 Fazer Login</h2>
+        </div>
+        <div class="card-body" style="padding: 2rem;">
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" style="margin-bottom: 1rem;">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    <strong>Erro:</strong> Nome de usuário ou senha incorretos.
+                </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="{{ form.username.id_for_label }}">Nome de usuário:</label>
+                    <input type="text" name="username" class="form-control" required>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label for="{{ form.password.id_for_label }}">Senha:</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem;">
+                    🚀 Entrar
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--cor-borda);">
+                <p style="margin-bottom: 0.5rem;">
+                    Não tem uma conta? 
+                    <a href="{% url 'register' %}" style="color: var(--cor-link);">
+                        Cadastre-se aqui
+                    </a>
+                </p>
+                <p style="margin: 0;">
+                    <a href="{% url 'password_reset' %}" style="color: var(--cor-link); font-size: 0.9rem;">
+                        Esqueceu a senha?
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
