@@ -13,9 +13,14 @@
             Conectamos proprietários e inquilinos de forma simples e segura
         </p>
         {% if user.is_authenticated %}
-            <a href="{% url 'create_ad' %}" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">
-                📝 Anunciar Meu Imóvel
-            </a>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="{% url 'create_ad' %}" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                    🏠 Anunciar Meu Imóvel
+                </a>
+                <a href="{% url 'my_chats' %}" class="btn btn-secondary" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                    💬 Meus Chats
+                </a>
+            </div>
         {% else %}
             <a href="{% url 'login' %}" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">
                 🔐 Fazer Login para Anunciar
@@ -37,7 +42,14 @@
     <div class="row">
         {% for ad in ads %}
         <div class="col-md-6">
-            <div class="card">
+            <div class="card" style="position: relative;">
+                {% if ad.created_by == request.user %}
+                    <!-- Badge para anúncios próprios -->
+                    <div style="position: absolute; top: 1rem; right: 1rem; background: var(--cor-link); color: white; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem; z-index: 10;">
+                        👤 Meu Anúncio
+                    </div>
+                {% endif %}
+                
                 <div class="card-body">
                     <!-- Título do Anúncio -->
                     <h3 class="card-title" style="color: var(--cor-destaque); font-size: 1.4rem;">
@@ -50,7 +62,7 @@
                             <strong>📍 Local:</strong> {{ ad.location }}
                         </p>
                         <p style="margin: 0.5rem 0; color: var(--cor-texto);">
-                            <strong>📂 Categoria:</strong> {{ ad.category }}
+                            <strong>🏷️ Categoria:</strong> {{ ad.category }}
                         </p>
                         <div style="font-size: 1.5rem; font-weight: bold; color: var(--cor-link); margin: 1rem 0;">
                             💰 R$ {{ ad.price }}/mês
@@ -66,7 +78,9 @@
                     
                     <!-- Informação do Proprietário -->
                     <p style="font-size: 0.9rem; color: var(--cor-destaque); margin-bottom: 1rem;">
-                        👤 Anunciado por: <strong>{{ ad.created_by.username }}</strong>
+                        👤 Anunciado por: <strong>{{ ad.created_by.get_full_name|default:ad.created_by.username }}</strong>
+                        <br>
+                        <small style="color: var(--cor-texto);">📅 {{ ad.created_at|date:"d/m/Y" }}</small>
                     </p>
                     
                     <!-- Botões de Ação -->
@@ -79,18 +93,26 @@
                             <a href="{% url 'delete_ad' ad.id %}" class="btn btn-danger">
                                 🗑️ Excluir
                             </a>
+                            <!-- Ver chats deste anúncio -->
+                            <a href="{% url 'my_chats' %}" class="btn btn-primary" style="background: var(--cor-alerta);">
+                                💬 Ver Interessados
+                            </a>
                         {% else %}
                             <!-- Botões para outros usuários -->
                             {% if user.is_authenticated %}
-                                <button class="btn btn-primary" onclick="alert('Em breve: sistema de contato!')">
-                                    📞 Entrar em Contato
+                                <!-- NOVO: Botão de Chat -->
+                                <a href="{% url 'start_chat' ad.id %}" class="btn btn-primary" style="background: var(--cor-link);">
+                                    💬 Conversar
+                                </a>
+                                <button class="btn btn-secondary" onclick="showContactInfo('{{ ad.created_by.username }}', '{{ ad.title }}')">
+                                    📞 Ver Contato
                                 </button>
-                                <button class="btn btn-secondary" onclick="alert('Em breve: favoritos!')">
+                                <button class="btn btn-secondary" onclick="addToFavorites({{ ad.id }}, '{{ ad.title }}')" style="background: var(--cor-sucesso);">
                                     ❤️ Favoritar
                                 </button>
                             {% else %}
                                 <a href="{% url 'login' %}" class="btn btn-primary">
-                                    🔐 Login para Contatar
+                                    🔐 Login para Conversar
                                 </a>
                             {% endif %}
                         {% endif %}
@@ -100,6 +122,14 @@
         </div>
         {% endfor %}
     </div>
+
+    <!-- Paginação (se implementar futuramente) -->
+    <div style="text-align: center; margin-top: 2rem;">
+        <p style="color: var(--cor-texto);">
+            Mostrando {{ ads|length }} imóve{{ ads|length|pluralize:"l,is" }} disponíve{{ ads|length|pluralize:"l,is" }}
+        </p>
+    </div>
+
 {% else %}
     <!-- Quando não há anúncios -->
     <div class="card" style="text-align: center;">
@@ -113,7 +143,7 @@
             </p>
             {% if user.is_authenticated %}
                 <a href="{% url 'create_ad' %}" class="btn btn-primary">
-                    📝 Criar Primeiro Anúncio
+                    🏠 Criar Primeiro Anúncio
                 </a>
             {% else %}
                 <a href="{% url 'login' %}" class="btn btn-primary">
@@ -124,13 +154,95 @@
     </div>
 {% endif %}
 
-<!-- Botão Flutuante para Criar Anúncio -->
+<!-- Botões Flutuantes -->
 {% if user.is_authenticated %}
-<div style="position: fixed; bottom: 2rem; right: 2rem; z-index: 100;">
+<div style="position: fixed; bottom: 2rem; right: 2rem; z-index: 100; display: flex; flex-direction: column; gap: 0.5rem;">
+    <!-- Botão de Criar Anúncio -->
     <a href="{% url 'create_ad' %}" class="btn btn-primary" 
-       style="border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 12px var(--sombra);">
+       style="border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 12px var(--sombra);"
+       title="Criar novo anúncio">
         ➕
+    </a>
+    
+    <!-- Botão de Chat -->
+    <a href="{% url 'my_chats' %}" class="btn btn-secondary" 
+       style="border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 12px var(--sombra); background: var(--cor-link); color: white;"
+       title="Meus chats"
+       id="chat-button">
+        💬
+        <!-- Badge de mensagens não lidas -->
+        <span id="unread-badge" style="display: none; position: absolute; top: -5px; right: -5px; background: var(--cor-erro); color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center;"></span>
     </a>
 </div>
 {% endif %}
+
+<!-- Modal para informações de contato (futuro) -->
+<div id="contactModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div class="modal-content" style="background: white; margin: 15% auto; padding: 2rem; border-radius: 10px; width: 80%; max-width: 500px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin: 0;">📞 Informações de Contato</h3>
+            <span onclick="closeContactModal()" style="cursor: pointer; font-size: 1.5rem;">&times;</span>
+        </div>
+        <div id="contact-info"></div>
+    </div>
+</div>
+
+<script>
+// Função para mostrar informações de contato
+function showContactInfo(username, title) {
+    document.getElementById('contact-info').innerHTML = `
+        <p><strong>🏠 Imóvel:</strong> ${title}</p>
+        <p><strong>👤 Proprietário:</strong> ${username}</p>
+        <p><strong>💡 Dica:</strong> Use o botão "💬 Conversar" para entrar em contato direto!</p>
+        <div style="margin-top: 1rem;">
+            <button class="btn btn-primary" onclick="closeContactModal()">✅ Entendi</button>
+        </div>
+    `;
+    document.getElementById('contactModal').style.display = 'block';
+}
+
+// Função para fechar modal
+function closeContactModal() {
+    document.getElementById('contactModal').style.display = 'none';
+}
+
+// Função para favoritar (placeholder)
+function addToFavorites(adId, title) {
+    alert(`❤️ "${title}" foi adicionado aos favoritos!\n\n(Em breve: sistema completo de favoritos)`);
+}
+
+// Função para buscar contador de mensagens não lidas (se implementar)
+function updateUnreadCount() {
+    {% if user.is_authenticated %}
+    fetch('{% url "get_unread_count_api" %}')
+        .then(response => response.json())
+        .then(data => {
+            const badge = document.getElementById('unread-badge');
+            if (data.unread_count > 0) {
+                badge.textContent = data.unread_count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        })
+        .catch(error => console.log('Erro ao buscar mensagens não lidas:', error));
+    {% endif %}
+}
+
+// Atualizar contador de mensagens a cada 30 segundos
+{% if user.is_authenticated %}
+setInterval(updateUnreadCount, 30000);
+// Atualizar na primeira carga
+document.addEventListener('DOMContentLoaded', updateUnreadCount);
+{% endif %}
+
+// Fechar modal ao clicar fora dele
+window.onclick = function(event) {
+    const modal = document.getElementById('contactModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+}
+</script>
 {% endblock %}
+        .

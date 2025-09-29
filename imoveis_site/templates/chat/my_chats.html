@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% block title %}Meus Chats - Site de Imóveis{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 900px; margin: 2rem auto;">
+    
+    <!-- Cabeçalho -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <div class="card-header" style="background: var(--gradiente); color: white;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <h2 style="margin: 0; font-size: 1.5rem;">💬 Minhas Conversas</h2>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                    <span style="background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.9rem;">
+                        📊 {{ total_chats }} conversa{{ total_chats|pluralize }}
+                    </span>
+                    <a href="{% url 'index' %}" class="btn" style="background: rgba(255,255,255,0.2); color: white; padding: 0.5rem 1rem; border-radius: 20px; text-decoration: none; font-size: 0.9rem;">
+                        🏠 Ver Anúncios
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if chat_list %}
+        <!-- Lista de Chats -->
+        <div class="row">
+            {% for chat in chat_list %}
+            <div class="col-md-12" style="margin-bottom: 1rem;">
+                <div class="card chat-item" style="transition: all 0.3s ease; border-left: 4px solid {% if chat.unread_count > 0 %}var(--cor-link){% else %}var(--cor-borda){% endif %};">
+                    <div class="card-body" style="padding: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+                            
+                            <!-- Informações principais -->
+                            <div style="flex: 1; min-width: 0;">
+                                <!-- Título do anúncio -->
+                                <h5 style="margin: 0 0 0.5rem 0; color: var(--cor-destaque); font-size: 1.2rem;">
+                                    🏠 {{ chat.ad.title }}
+                                </h5>
+                                
+                                <!-- Informações do outro usuário -->
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                    <div style="width: 40px; height: 40px; background: var(--cor-link); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.1rem;">
+                                        {{ chat.other_user.username|slice:":1"|upper }}
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--cor-destaque);">
+                                            {{ chat.other_user.get_full_name|default:chat.other_user.username }}
+                                        </div>
+                                        <div style="font-size: 0.85rem; color: var(--cor-texto);">
+                                            @{{ chat.other_user.username }}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Última mensagem -->
+                                {% if chat.last_message %}
+                                <div style="background: var(--cor-primaria); padding: 0.75rem; border-radius: 8px; margin-bottom: 0.75rem;">
+                                    <div style="font-size: 0.85rem; color: var(--cor-texto); margin-bottom: 0.25rem;">
+                                        <strong>{{ chat.last_message.sender.username }}:</strong>
+                                    </div>
+                                    <div style="color: var(--cor-texto); line-height: 1.4;">
+                                        {{ chat.last_message.message|truncatewords:15 }}
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--cor-texto); margin-top: 0.25rem; text-align: right;">
+                                        {{ chat.last_message.created_at|date:"d/m/Y H:i" }}
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div style="background: var(--cor-primaria); padding: 0.75rem; border-radius: 8px; margin-bottom: 0.75rem; text-align: center; color: var(--cor-texto); font-style: italic;">
+                                    Nenhuma mensagem ainda
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Detalhes do anúncio -->
+                                <div style="font-size: 0.9rem; color: var(--cor-texto); display: flex; gap: 1rem; flex-wrap: wrap;">
+                                    <span>📍 {{ chat.ad.location }}</span>
+                                    <span>💰 R$ {{ chat.ad.price }}</span>
+                                    <span>📅 {{ chat.room.created_at|date:"d/m/Y" }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Badge e ações -->
+                            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;">
+                                <!-- Badge de mensagens não lidas -->
+                                {% if chat.unread_count > 0 %}
+                                <span style="background: var(--cor-erro); color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold;">
+                                    {{ chat.unread_count }}
+                                </span>
+                                {% endif %}
+                                
+                                <!-- Botões de ação -->
+                                <div style="display: flex; flex-direction: column; gap: 0.5rem; min-width: 120px;">
+                                    <a href="{% url 'chat_room' chat.room.id %}" class="btn btn-primary btn-sm" style="text-align: center;">
+                                        💬 Abrir Chat
+                                    </a>
+                                    <a href="{% url 'archive_chat' chat.room.id %}" class="btn btn-secondary btn-sm" style="text-align: center;">
+                                        📁 Arquivar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Paginação futura -->
+        <div style="text-align: center; margin-top: 2rem; color: var(--cor-texto);">
+            Mostrando {{ chat_list|length }} de {{ total_chats }} conversa{{ total_chats|pluralize }}
+        </div>
+        
+    {% else %}
+        <!-- Estado vazio -->
+        <div class="card" style="text-align: center;">
+            <div class="card-body" style="padding: 4rem 2rem;">
+                <div style="font-size: 4rem; margin-bottom: 1.5rem;">💬</div>
+                <h3 style="color: var(--cor-destaque); margin-bottom: 1rem;">
+                    Nenhuma conversa ainda
+                </h3>
+                <p style="color: var(--cor-texto); margin-bottom: 2rem; max-width: 400px; margin-left: auto; margin-right: auto;">
+                    Você ainda não iniciou nenhuma conversa. Encontre um imóvel interessante e clique em "Conversar" para entrar em contato com o anunciante.
+                </p>
+                
+                <!-- Ações sugeridas -->
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
+                    <a href="{% url 'index' %}" class="btn btn-primary" style="padding: 1rem 2rem;">
+                        🏠 Ver Imóveis
+                    </a>
+                    <a href="{% url 'create_ad' %}" class="btn btn-secondary" style="padding: 1rem 2rem;">
+                        ➕ Anunciar Imóvel
+                    </a>
+                </div>
+                
+                <!-- Dicas -->
+                <div style="margin-top: 3rem; background: var(--cor-primaria); padding: 2rem; border-radius: 10px;">
+                    <h5 style="color: var(--cor-destaque); margin-bottom: 1rem;">💡 Como funciona?</h5>
+                    <div style="text-align: left; max-width: 500px; margin: 0 auto;">
+                        <p style="margin-bottom: 0.5rem;">1. 🏠 Navegue pelos anúncios de imóveis</p>
+                        <p style="margin-bottom: 0.5rem;">2. 💬 Clique em "Conversar" no imóvel que interessar</p>
+                        <p style="margin-bottom: 0.5rem;">3. 📝 Envie mensagens diretamente ao proprietário</p>
+                        <p style="margin: 0;">4. 🤝 Negocie detalhes e marque visitas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.chat-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .card-body > div {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    
+    .card-body > div > div:last-child {
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        margin-top: 1rem;
+    }
+    
+    .card-body > div > div:last-child > div:last-child {
+        flex-direction: row !important;
+        min-width: auto !important;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Atualizar contador de mensagens não lidas a cada 30 segundos
+    function updateUnreadCounts() {
+        // Buscar contadores atualizados via AJAX
+        fetch('/api/chat/unread-count/')
+            .then(response => response.json())
+            .then(data => {
+                // Atualizar badges na página
+                // (implementação futura para atualização em tempo real)
+            })
+            .catch(error => console.log('Erro ao atualizar contadores:', error));
+    }
+    
+    // Executar atualização a cada 30 segundos
+    setInterval(updateUnreadCounts, 30000);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}Chat - {{ ad.title }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; margin: 1rem auto;">
+    
+    <!-- Cabeçalho do Chat -->
+    <div class="card" style="margin-bottom: 1rem; position: sticky; top: 0; z-index: 10; border-radius: 15px 15px 0 0;">
+        <div class="card-header" style="background: var(--gradiente); color: white; padding: 1rem 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                <div style="flex: 1;">
+                    <h4 style="margin: 0; font-size: 1.2rem;">
+                        💬 Chat sobre: {{ ad.title }}
+                    </h4>
+                    <div style="font-size: 0.9rem; opacity: 0.9; margin-top: 0.25rem;">
+                        👤 Conversando com: <strong>{{ other_participant.get_full_name|default:other_participant.username }}</strong>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                    <a href="{% url 'my_chats' %}" class="btn" style="background: rgba(255,255,255,0.2); color: white; padding: 0.5rem 1rem; border-radius: 20px; text-decoration: none; font-size: 0.9rem;">
+                        📋 Meus Chats
+                    </a>
+                    <a href="{% url 'index' %}" class="btn" style="background: rgba(255,255,255,0.2); color: white; padding: 0.5rem 1rem; border-radius: 20px; text-decoration: none; font-size: 0.9rem;">
+                        🏠 Início
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Área de Mensagens -->
+    <div class="card" style="margin-bottom: 1rem; min-height: 400px; border-radius: 0;">
+        <div class="card-body" style="padding: 0; display: flex; flex-direction: column; height: 500px;">
+            
+            <!-- Container das Mensagens -->
+            <div id="messages-container" style="flex: 1; overflow-y: auto; padding: 1rem; background: var(--cor-primaria);">
+                {% if chat_messages %}
+                    {% for message in chat_messages %}
+                    <div class="message-bubble" style="margin-bottom: 1rem; display: flex; {% if message.sender == request.user %}justify-content: flex-end;{% else %}justify-content: flex-start;{% endif %}">
+                        <div style="max-width: 70%; {% if message.sender == request.user %}background: var(--cor-link); color: white; border-radius: 20px 20px 5px 20px;{% else %}background: white; color: var(--cor-texto); border-radius: 20px 20px 20px 5px; box-shadow: 0 2px 5px var(--sombra);{% endif %} padding: 0.75rem 1rem;">
+                            <!-- Cabeçalho da mensagem -->
+                            <div style="font-size: 0.8rem; opacity: 0.8; margin-bottom: 0.25rem; {% if message.sender == request.user %}text-align: right;{% endif %}">
+                                {% if message.sender != request.user %}
+                                    <strong>{{ message.sender.get_full_name|default:message.sender.username }}</strong> •
+                                {% endif %}
+                                {{ message.created_at|date:"d/m H:i" }}
+                            </div>
+                            <!-- Conteúdo da mensagem -->
+                            <div style="line-height: 1.4;">
+                                {{ message.message|linebreaksbr }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- Primeira mensagem -->
+                    <div style="text-align: center; padding: 3rem 1rem; color: var(--cor-texto);">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">💬</div>
+                        <h4>Início da conversa</h4>
+                        <p>Esta é uma nova conversa sobre <strong>{{ ad.title }}</strong></p>
+                        <p>Envie a primeira mensagem para começar!</p>
+                    </div>
+                {% endif %}
+                
+                <!-- Indicador de "usuário digitando" (futuro) -->
+                <div id="typing-indicator" style="display: none; margin-bottom: 1rem;">
+                    <div style="background: white; padding: 0.5rem 1rem; border-radius: 20px; display: inline-block; box-shadow: 0 2px 5px var(--sombra);">
+                        <span style="font-size: 0.9rem; color: var(--cor-texto);">{{ other_participant.username }} está digitando...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Formulário de Envio -->
+            <div style="border-top: 1px solid var(--cor-borda); padding: 1rem; background: white;">
+                <form method="post" style="display: flex; gap: 0.5rem; align-items: flex-end;">
+                    {% csrf_token %}
+                    <div style="flex: 1;">
+                        <textarea name="message" 
+                                placeholder="Digite sua mensagem..." 
+                                required
+                                style="width: 100%; border: 2px solid var(--cor-borda); border-radius: 25px; padding: 0.75rem 1rem; resize: vertical; min-height: 50px; max-height: 120px; font-family: inherit; font-size: 1rem; line-height: 1.4;"
+                                rows="1"
+                                id="message-input"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
+                        🚀
+                    </button>
+                </form>
+                
+                <!-- Dicas -->
+                <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--cor-texto); text-align: center;">
+                    💡 Dica: Pressione Enter para quebrar linha, Ctrl+Enter para enviar
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações do Anúncio -->
+    <div class="card" style="border-radius: 0 0 15px 15px;">
+        <div class="card-body" style="padding: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div style="flex: 1;">
+                    <h6 style="margin: 0; color: var(--cor-destaque);">📋 Sobre este anúncio:</h6>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 0.9rem;">
+                        <strong>{{ ad.title }}</strong> • {{ ad.location }} • R$ {{ ad.price }}
+                    </p>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <a href="{% url 'archive_chat' chat_room.id %}" class="btn btn-secondary btn-sm">
+                        📁 Arquivar Chat
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const messagesContainer = document.getElementById('messages-container');
+    const messageInput = document.getElementById('message-input');
+    
+    // Rolar para o final das mensagens
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // Auto-resize do textarea
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+    
+    // Ctrl+Enter para enviar
+    messageInput.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'Enter') {
+            e.preventDefault();
+            this.form.submit();
+        }
+    });
+    
+    // Focar no input
+    messageInput.focus();
+    
+    // Atualização automática de mensagens (a cada 5 segundos)
+    let lastCheck = new Date().toISOString();
+    
+    function checkNewMessages() {
+        fetch(`/api/chat/{{ chat_room.id }}/messages/?last_check=${lastCheck}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.messages && data.messages.length > 0) {
+                    // Adicionar novas mensagens ao DOM
+                    data.messages.forEach(message => {
+                        if (!message.is_own) {
+                            addMessageToDOM(message);
+                        }
+                    });
+                    
+                    // Rolar para o final
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    
+                    // Atualizar último check
+                    lastCheck = data.current_time;
+                }
+            })
+            .catch(error => console.log('Erro ao buscar mensagens:', error));
+    }
+    
+    function addMessageToDOM(message) {
+        const messageHTML = `
+            <div class="message-bubble" style="margin-bottom: 1rem; display: flex; justify-content: flex-start;">
+                <div style="max-width: 70%; background: white; color: var(--cor-texto); border-radius: 20px 20px 20px 5px; box-shadow: 0 2px 5px var(--sombra); padding: 0.75rem 1rem;">
+                    <div style="font-size: 0.8rem; opacity: 0.8; margin-bottom: 0.25rem;">
+                        <strong>${message.sender}</strong> • ${message.formatted_time}
+                    </div>
+                    <div style="line-height: 1.4;">
+                        ${message.message.replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+            </div>
+        `;
+        messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+    }
+    
+    // Verificar novas mensagens a cada 5 segundos
+    setInterval(checkNewMessages, 5000);
+});
+</script>
+{% endblock %}

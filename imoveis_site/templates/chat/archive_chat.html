@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Arquivar Chat - Site de Imóveis{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 500px; margin: 3rem auto;">
+    <div class="card">
+        <div class="card-header" style="background: var(--cor-alerta); color: white; text-align: center;">
+            <h3 style="margin: 0;">📁 Arquivar Conversa</h3>
+        </div>
+        <div class="card-body" style="padding: 2rem; text-align: center;">
+            
+            <!-- Ícone de alerta -->
+            <div style="font-size: 4rem; margin-bottom: 1.5rem;">⚠️</div>
+            
+            <!-- Informações da conversa -->
+            <div style="background: var(--cor-primaria); padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem; text-align: left;">
+                <h5 style="color: var(--cor-destaque); margin-bottom: 1rem;">Conversa a ser arquivada:</h5>
+                <p style="margin-bottom: 0.5rem;"><strong>Anúncio:</strong> {{ ad.title }}</p>
+                <p style="margin-bottom: 0.5rem;"><strong>Participante:</strong> {{ other_participant.get_full_name|default:other_participant.username }}</p>
+                <p style="margin-bottom: 0.5rem;"><strong>Localização:</strong> {{ ad.location }}</p>
+                <p style="margin: 0;"><strong>Valor:</strong> R$ {{ ad.price }}</p>
+            </div>
+            
+            <!-- Explicação -->
+            <div style="text-align: left; background: #fff3cd; border: 1px solid #ffeaa7; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+                <h6 style="color: #856404; margin-bottom: 1rem;">📋 O que acontecerá:</h6>
+                <ul style="color: #856404; margin: 0; padding-left: 1.5rem;">
+                    <li>A conversa será <strong>ocultada</strong> da sua lista de chats</li>
+                    <li>As mensagens <strong>não serão excluídas</strong> permanentemente</li>
+                    <li>O outro usuário ainda poderá ver a conversa normalmente</li>
+                    <li>Você poderá reativar o chat entrando em contato novamente</li>
+                </ul>
+            </div>
+            
+            <!-- Confirmação -->
+            <p style="color: var(--cor-texto); margin-bottom: 2rem; font-weight: 500;">
+                Tem certeza de que deseja arquivar esta conversa?
+            </p>
+            
+            <!-- Botões de ação -->
+            <form method="post" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                {% csrf_token %}
+                <button type="submit" class="btn" style="background: var(--cor-alerta); color: white; padding: 1rem 2rem;">
+                    📁 Sim, Arquivar
+                </button>
+                <a href="{% url 'chat_room' chat_room.id %}" class="btn btn-secondary" style="padding: 1rem 2rem;">
+                    ❌ Cancelar
+                </a>
+            </form>
+            
+            <!-- Alternativas -->
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--cor-borda);">
+                <h6 style="color: var(--cor-destaque); margin-bottom: 1rem;">Outras opções:</h6>
+                <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="{% url 'my_chats' %}" class="btn btn-secondary btn-sm">
+                        📋 Ver Todos os Chats
+                    </a>
+                    <a href="{% url 'index' %}" class="btn btn-secondary btn-sm">
+                        🏠 Voltar ao Início
+                    </a>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- Dicas adicionais -->
+    <div class="card" style="margin-top: 1.5rem; background: var(--cor-primaria); border: none;">
+        <div class="card-body" style="text-align: center; padding: 1.5rem;">
+            <h6 style="color: var(--cor-destaque); margin-bottom: 1rem;">💡 Dicas úteis:</h6>
+            <div style="font-size: 0.9rem; color: var(--cor-texto); line-height: 1.6;">
+                <p style="margin-bottom: 0.5rem;">• Para reativar: clique em "Conversar" no anúncio novamente</p>
+                <p style="margin-bottom: 0.5rem;">• Mensagens importantes podem ser copiadas antes de arquivar</p>
+                <p style="margin: 0;">• O arquivamento é reversível e não afeta o outro usuário</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Adicionar confirmação extra por JavaScript
+    const form = document.querySelector('form');
+    const submitButton = form.querySelector('button[type="submit"]');
+    
+    form.addEventListener('submit', function(e) {
+        const confirmed = confirm(
+            'Confirma que deseja arquivar esta conversa?\n\n' +
+            'A conversa será ocultada da sua lista, mas poderá ser reativada.'
+        );
+        
+        if (!confirmed) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}
