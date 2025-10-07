@@ -8,9 +8,7 @@ https://docs.djangoproject.com/en/5.2/howto/deployment/wsgi/
 """
 
 import os
-
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'imoveis_site.settings')
-
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'imoveis_site.settings')  # Deve corresponder ao nome do seu projeto
 application = get_wsgi_application()
